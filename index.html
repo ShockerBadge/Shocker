@@ -1,5 +1,6 @@
 <html>
 <head>
+    <!-- Proudly made with VanillaJS http://vanilla-js.com/  -->
 <style>
     html, body {
         height: 100%;
@@ -18,7 +19,7 @@
         background-color: #c0392b;
         position: absolute;
         border-radius: 50%;
-        top: 50%;
+        top: 60%;
         left: 50%;
         width: 480px;
         height: 80px;
@@ -144,6 +145,47 @@
         }
 
     </style>
+    <style>
+        /* The Modal (background) */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
+
+        /* Modal Content/Box */
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto; /* 15% from the top and centered */
+            padding: 20px;
+            border: 1px solid black;
+            border-radius: 5px;
+            width: 80%; /* Could be more or less, depending on screen size */
+            text-align: center;
+        }
+
+        /* The Close Button */
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
 
 </head>
 <body>
@@ -159,12 +201,31 @@
 </div>
 <a id="big_red_button" onClick="HIT_THE_BUTTON()" class="button"></a>
 
+<!-- The Modal -->
+<div id="myModal" class="modal">
+
+    <!-- Modal content -->
+    <div class="modal-content">
+        <h2>Sorry, this demo requires the latest version of Chrome and Web Bluetooth support</h2>
+        <p> see <a target="_blank" href="https://github.com/WebBluetoothCG/web-bluetooth/blob/master/implementation-status.md"> this page</a> for more information</p>
+    </div>
+
+</div>
+
 <script type="application/javascript">
+
+    var modal = document.getElementById("myModal");
+    if(!navigator.bluetooth)
+        modal.style.display= "block";
+    else
+        modal.style.display = "none";
+
     var timeout = 0;
     var timer_handle = -1;
     var shocker_service_UUID ='2a1dcfb0-4bff-4a8f-9887-2e4b0b56cef5';
     var shocker_chr_UUID = '01f176bd-b16e-4cf3-9536-dc0c211ffc6b';
     var name_chr_UUID = '01f176bd-b16e-4cf3-9536-dc0c211ffc6c';
+    var device = null;
     var service =null;
     var name = "";
     var intensity = -1;
@@ -193,9 +254,10 @@
                         acceptAllDevices: true,
                         optionalServices:[shocker_service_UUID]
                     })
-                    .then(device => {
+                    .then(d => {
+                        device = d;
                         log('Connecting to Bluetooth GATT Server...' );
-                        return device.gatt.connect();
+                        return d.gatt.connect();
                     }).then(server => {
                 log('Getting Shocker Service...');
                 return server.getPrimaryService(shocker_service_UUID);
@@ -236,7 +298,18 @@
                 }, 1000);
         })
                     .then(()=> document.getElementById("shocker").innerText = "Shock " + name)
-                    .catch((e) => { log("ERROR: " + e)});
+                    .then(()=> {  if(device) {
+                                    device.gatt.disconnect();
+                                    device = null;
+                    }
+                    })
+                    .catch((e) => {
+                        log("ERROR: " + e);
+                        if(device) {
+                            device.gatt.disconnect();
+                            device = null;
+                        }
+                    });
 
 
         /* write to name
