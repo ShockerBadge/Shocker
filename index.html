@@ -227,7 +227,7 @@
     var name_chr_UUID = '01f176bd-b16e-4cf3-9536-dc0c211ffc6c';
     var device = null;
     var service =null;
-    var name = "";
+    var name = " ";
     var intensity = -1;
 
 
@@ -263,7 +263,7 @@
                 return server.getPrimaryService(shocker_service_UUID);
             })
             .then(s=> service = s)
-            .then(()=> {
+            /*.then(()=> {
                 return service.getCharacteristic(name_chr_UUID);
             })
             .then((characteristic) => {
@@ -273,7 +273,7 @@
             .then(n=> {
                 name="";
                 for(var i=0; i< n.byteLength; i++) name += String.fromCharCode(n.getUint8(i));
-            }).then(()=>log("Connected to " + name))
+            }).then(()=>log("Connected to " + name))*/
             .then(() => {
 
                 return service.getCharacteristic(shocker_chr_UUID);
